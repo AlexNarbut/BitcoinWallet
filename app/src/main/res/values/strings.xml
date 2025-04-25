@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">BitcoinApp</string>
+
+    <string name="error_default">Unknown error. Try later</string>
+    <string name="error_wallet_address_balance_not_found">Wallet address not initialized or not found. Try later</string>
+    <string name="error_wallet_address_balance_not_mapped">Wallet address is not mapped or not found. Try later</string>
+    <string name="error_wallet_profile_not_initialized">Wallet profile is not initialized. Try later</string>
+    <string name="error_wallet_profile_not_load_from_file">Wallet profile is not load from file. Try later</string>
+
+    <string name="error_transaction_not_enough_coins">Not enough coins for transaction. Change amount and try again</string>
+    <string name="error_transaction_utxo_not_found">Not found needed utxo for transaction. Change amount and try again</string>
+
+
+    <string name="error_network_is_not_available">Internet connection error. Check the internet connection and try again</string>
+</resources>
