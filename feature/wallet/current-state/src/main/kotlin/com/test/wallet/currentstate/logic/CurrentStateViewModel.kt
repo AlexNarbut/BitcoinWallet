@@ -46,8 +46,9 @@ class CurrentStateViewModel @Inject constructor(
         _transactionHistoryFlow,
         _isTransactionRefreshing
     ) { addressState, balance, transactionHistory, isRefreshing ->
-        val transactionUIState = transactionHistory.mapContent { it.map { it.toViewModel() } }
         val headerState = getHeaderState(addressState, balance)
+
+        val transactionUIState = transactionHistory.mapContent { it.map { it.toViewModel() } }
 
         val updatedRefreshingState = isRefreshing && transactionUIState.isLoading()
 

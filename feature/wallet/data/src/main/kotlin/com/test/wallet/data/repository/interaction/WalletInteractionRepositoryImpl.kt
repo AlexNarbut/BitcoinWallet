@@ -111,7 +111,12 @@ class WalletInteractionRepositoryImpl(
                 }
 
                 is Response.Error -> {
-                    Response.Error.General(WalletProfileNotInitializedException(message = "Wallet is not initialized"))
+                    Response.Error.General(
+                        WalletProfileNotInitializedException(
+                            cause = initResponse.exception,
+                            message = "Wallet is not initialized ${initResponse.message?.let { "($it)" }?:""}"
+                        )
+                    )
                 }
             }
         }
@@ -127,7 +132,14 @@ class WalletInteractionRepositoryImpl(
                 }
 
                 is Response.Error -> {
-                    flowOf(Response.Error.General(WalletProfileNotInitializedException(message = "Wallet is not initialized")))
+                    flowOf(
+                        Response.Error.General(
+                            WalletProfileNotInitializedException(
+                                cause = initResponse.exception,
+                                message = "Wallet is not initialized ${initResponse.message?.let { "($it)"}?:""}"
+                            )
+                        )
+                    )
                 }
             }
         }

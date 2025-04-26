@@ -22,11 +22,11 @@ internal fun getHeaderState(
     addressState: LCEState<String>,
     balanceInfoState: LCEState<WalletBalanceInfo>
 ): LCEState<CurrentStateHeader> {
-    if (addressState is LCEState.None) return addressState
-    if (balanceInfoState is LCEState.None) return balanceInfoState
-
     if (addressState is LCEState.Error) return addressState
     if (balanceInfoState is LCEState.Error) return balanceInfoState
+
+    if (addressState is LCEState.None) return addressState
+    if (balanceInfoState is LCEState.None) return balanceInfoState
 
     if (addressState is LCEState.Loading) return LCEState.Loading
     if (balanceInfoState is LCEState.Loading) return LCEState.Loading

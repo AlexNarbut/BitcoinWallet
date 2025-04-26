@@ -20,8 +20,7 @@ class WalletAddressInfosAssertProvider(
     override fun get(): Response<List<WalletAddressInfo>> {
         val addressesDataResponse = loadAddressesFromFile()
         val keysDataResponse = loadPrivateKeyFromFile()
-
-        if (addressesDataResponse !is Response.Success) {
+        if (addressesDataResponse !is Response.Success || addressesDataResponse.value.isEmpty()) {
             return Response.Error.General(
                 WalletProfileNotLoadFromFileException(
                     addressesDataResponse.getExceptionIfError(),
@@ -29,7 +28,7 @@ class WalletAddressInfosAssertProvider(
                 )
             )
         }
-        if (keysDataResponse !is Response.Success) {
+        if (keysDataResponse !is Response.Success || keysDataResponse.value.isEmpty()) {
             return Response.Error.General(
                 WalletProfileNotLoadFromFileException(
                     keysDataResponse.getExceptionIfError(),
