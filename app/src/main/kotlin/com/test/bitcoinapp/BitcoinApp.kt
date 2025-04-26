@@ -3,6 +3,7 @@ package com.test.bitcoinapp
 import android.app.Application
 import com.test.bitcoinappuikit.AppContext
 import com.test.bitcoinappuikit.initContext
+import com.test.bitcoinappuikit.theme.DEFAULT_APP_DIMENS
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -15,7 +16,8 @@ class BitcoinApp : Application(){
         initContext(
             MutableStateFlow(
                 AppContext(
-                    context = this.applicationContext
+                    context = this.applicationContext,
+                    DEFAULT_APP_DIMENS.getDimensClass()
                 )
             )
         )

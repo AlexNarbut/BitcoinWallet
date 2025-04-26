@@ -1,4 +1,4 @@
-package com.test.bitcoinappuikit.base
+package com.test.bitcoinappuikit.vm
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

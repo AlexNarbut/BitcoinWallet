@@ -26,10 +26,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
@@ -46,15 +44,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.test.bitcoinappuikit.composableDimens
 import com.test.bitcoinappuikit.lce.LCEState
 import com.test.bitcoinappuikit.lce.render
+import com.test.bitcoinappuikit.string
+import com.test.bitcoinappuikit.ui.CrSubText
+import com.test.bitcoinappuikit.ui.CrSubTitleText
+import com.test.bitcoinappuikit.ui.CrText
+import com.test.bitcoinappuikit.ui.CrTitleText
 import com.test.bitcoinappuikit.ui.InfoDialog
 import com.test.bitcoinappuikit.ui.shimmerEffect
 import com.test.feature.wallet.currentstate.R
@@ -62,6 +65,7 @@ import com.test.wallet.sendcoins.logic.SendCoinsViewModel
 import com.test.wallet.sendcoins.logic.SendCoinsWalletState
 import com.test.wallet.sendcoins.logic.SendFormState
 import com.test.wallet.sendcoins.logic.SendState
+import ru.alarmtrade.pandoracsinstaller.ui.view.buttons.CrButton
 
 @Preview(showBackground = true)
 @Composable
@@ -92,7 +96,7 @@ internal fun SendCoinsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Send coins") },
+                title = { CrTitleText(text = string(R.string.send_coins_title)) },
                 navigationIcon = {
                     IconButton(onClick = { onBack() }) {
                         Icon(
@@ -109,7 +113,7 @@ internal fun SendCoinsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 8.dp)
+                .padding(composableDimens().marginSmallSize.dp)
         ) {
             Column {
                 Header(
@@ -118,7 +122,7 @@ internal fun SendCoinsScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(composableDimens().marginMediumSize.dp))
 
                 SendForm(
                     sendFormState = { state.value.sendFormState },
@@ -136,7 +140,7 @@ internal fun SendCoinsScreen(
                 contentDescription = "Refresh state",
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .size(24.dp)
+                    .size(composableDimens().iconMediumSize.dp)
                     .clickable { vm.updateWalletProfile() }
             )
 
@@ -159,59 +163,54 @@ internal fun Header(
     Box(modifier) {
         Column(
             modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(composableDimens().marginMediumSize.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
                 painterResource(R.drawable.bitcoin_header),
                 contentDescription = "",
-                modifier = Modifier.size(64.dp)
+                modifier = Modifier.size(composableDimens().iconXLargeSize.dp)
             )
-            Spacer(Modifier.height(4.dp))
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                wallet.invoke().render(
-                    error = { error ->
-                        Text(
-                            error,
-                            modifier.clickable {
-                                onReload()
-                            }
-                        )
-                    },
-                    loading = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(0.5f)
-                                .shimmerEffect()
-                        )
-                    },
-                ) { info ->
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        Button(onClick = {
-                            showAddressDialog.value = info.currentAddress
-                        }) {
-                            Text("Address")
-                        }
-                        Row {
-                            Text(
-                                "Address balance: ${info.addressBalanceIntBtc}",
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                    }
 
+            wallet.invoke().render(
+                error = { error ->
+                    CrText(
+                        error,
+                        modifier.clickable {
+                            onReload()
+                        }
+                    )
+                },
+                loading = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f)
+                            .shimmerEffect()
+                    )
+                },
+            ) { info ->
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(composableDimens().marginMediumSize.dp),
+                ) {
+                    Button(onClick = {
+                        showAddressDialog.value = info.currentAddress
+                    }) {
+                        CrText(string(R.string.header_address_title))
+                    }
+                    Row {
+                        CrSubTitleText(
+                            string(R.string.header_address_title) + ": ${info.addressBalanceIntBtc}",
+                        )
+                    }
                 }
+
             }
         }
     }
     if (!showAddressDialog.value.isNullOrEmpty()) {
         InfoDialog(
-            "Current address",
+            string(R.string.dialog_current_address_title),
             showAddressDialog.value ?: "",
             onClose = { showAddressDialog.value = null }
         )
@@ -232,13 +231,13 @@ internal fun SendForm(
     ) {
         Column(
             modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(composableDimens().marginMediumSize.dp)
         ) {
             TextField(
                 value = sendFormState.invoke().sendAddress.str,
                 isError = !sendFormState.invoke().sendAddress.isValid,
                 onValueChange = onAddressChange,
-                label = { Text("Address to Send") },
+                label = { CrSubText(string(R.string.edit_address_to_send)) },
                 modifier = modifier
             )
 
@@ -246,7 +245,7 @@ internal fun SendForm(
                 value = sendFormState.invoke().sendAmount.str,
                 isError = !sendFormState.invoke().sendAmount.isValid,
                 onValueChange = onAmountChange,
-                label = { Text("Amount") },
+                label = { CrSubText(string(R.string.edit_amount)) },
                 modifier = modifier,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
@@ -255,18 +254,17 @@ internal fun SendForm(
                 value = sendFormState.invoke().feeAmount.str,
                 isError = !sendFormState.invoke().feeAmount.isValid,
                 onValueChange = onFeeAmountChange,
-                label = { Text("Fee amount") },
+                label = { CrSubText(string(R.string.edit_fee_amount)) },
                 modifier = modifier,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             )
 
-            Button(
+            CrButton(
+                text = string(R.string.button_send_coins),
                 onClick = { onSend.invoke() },
                 enabled = sendFormState.invoke().canSend,
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Send")
-            }
+            )
         }
     }
 }
@@ -285,30 +283,28 @@ fun SendDialog(
             modifier = modifier,
             text = {
                 Column(Modifier.fillMaxWidth()) {
-                    Text(
+                    CrTitleText(
                         text = when (dialogState.invoke()) {
-                            SendState.Default -> "Preparing"
-                            SendState.Sending -> "Sending"
-                            is SendState.SentError -> "Error"
-                            is SendState.SentSuccess -> "Coins were sent success!"
+                            SendState.Default -> string(R.string.sending_coins_state_default)
+                            SendState.Sending -> string(R.string.sending_coins_state_sending)
+                            is SendState.SentError -> string(R.string.sending_coins_state_sent_error)
+                            is SendState.SentSuccess -> string(R.string.sending_coins_state_sent_success)
                         },
-                        style = MaterialTheme.typography.titleMedium
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(composableDimens().marginMediumSize.dp))
                     Box(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
                         when (val state = dialogState.invoke()) {
                             SendState.Sending -> {
-                                CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                                CircularProgressIndicator(modifier = Modifier.size(composableDimens().iconLargeSize.dp))
                             }
 
                             SendState.Default -> {}
                             is SendState.SentError -> {
-                                Text(
-                                    state.errorString ?: "Unknown error",
-                                    style = MaterialTheme.typography.bodyLarge,
+                                CrText(
+                                    state.errorString ?: string(R.string.error_sent_coins_unknown_error),
                                 )
                             }
 
@@ -316,7 +312,7 @@ fun SendDialog(
                                 val textLayoutResult =
                                     remember { mutableStateOf<TextLayoutResult?>(null) }
                                 val annotatedString = buildAnnotatedString {
-                                    append("Your transaction ID is ")
+                                    append(string(R.string.sending_coins_success_sub_body) + " ")
 
                                     val startIndex = length
                                     withStyle(
@@ -338,9 +334,8 @@ fun SendDialog(
                                     append(".")
                                 }
 
-                                Text(
+                                CrText(
                                     text = annotatedString,
-                                    style = MaterialTheme.typography.bodyLarge,
                                     modifier = Modifier.pointerInput(Unit) {
                                         detectTapGestures { offsetPosition ->
                                             textLayoutResult.value?.let { layoutResult ->
@@ -373,7 +368,7 @@ fun SendDialog(
                         TextButton(onClick = {
                             onDismissRequest.invoke()
                         }) {
-                            Text("Ok")
+                            CrText(string(R.string.button_send_reset_sent_dialog))
                         }
                     }
 

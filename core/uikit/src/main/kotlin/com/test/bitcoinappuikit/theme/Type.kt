@@ -7,29 +7,53 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 // Set of Material typography styles to start with
-val Typography =
+fun getTypography(dimensImpl: DimensImpl) =
     Typography(
-        bodyLarge = TextStyle(
-            fontFamily = FontFamily.Default,
+        displayLarge = TextStyle(
+            fontSize = dimensImpl.textH1Size.sp,
             fontWeight = FontWeight.Normal,
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
-            letterSpacing = 0.5.sp
-        )
-        /* Other default text styles to override
-        titleLarge = TextStyle(
-            fontFamily = FontFamily.Default,
+        ), displayMedium = TextStyle(
+            fontSize = dimensImpl.textH2Size.sp,
+            fontWeight = FontWeight.Bold,
+        ), displaySmall = TextStyle(
+            fontSize = dimensImpl.textH3Size.sp,
+            fontWeight = FontWeight.SemiBold,
+        ), headlineLarge = TextStyle(
+            fontSize = dimensImpl.textH5Size.sp,
+            fontWeight = FontWeight.SemiBold,
+        ), headlineMedium = TextStyle(
+            fontSize = dimensImpl.textH5Size.sp,
+            fontWeight = FontWeight.SemiBold,
+        ), headlineSmall = TextStyle(
+            fontSize = dimensImpl.textH5Size.sp,
+            fontWeight = FontWeight.SemiBold,
+        ), titleLarge = TextStyle(
+            fontSize = dimensImpl.textH6Size.sp,
+            fontWeight = FontWeight.Bold,
+        ), titleMedium = TextStyle(
+            fontSize = dimensImpl.textSubTitle1Size.sp,
+            fontWeight = FontWeight.SemiBold,
+        ), titleSmall = TextStyle(
+            fontSize = dimensImpl.textSubTitle2Size.sp,
+            fontWeight = FontWeight.SemiBold,
+        ), bodyLarge = TextStyle(
+            fontSize = dimensImpl.textBody1Size.sp,
             fontWeight = FontWeight.Normal,
-            fontSize = 22.sp,
-            lineHeight = 28.sp,
-            letterSpacing = 0.sp
-        ),
-        labelSmall = TextStyle(
-            fontFamily = FontFamily.Default,
-            fontWeight = FontWeight.Medium,
-            fontSize = 11.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.5.sp
+
+            ), bodyMedium = TextStyle(
+            fontSize = dimensImpl.textBody1Size.sp,
+            fontWeight = FontWeight.SemiBold,
+        ), bodySmall = TextStyle(
+            fontSize = dimensImpl.textCaptionSize.sp,
+            fontWeight = FontWeight.Normal,
+        ), labelLarge = TextStyle(
+            fontSize = dimensImpl.textButtonSize.sp,
+            fontWeight = FontWeight.Normal,
+        ), labelMedium = TextStyle(
+            fontSize = dimensImpl.textOverlineSize.sp,
+            fontWeight = FontWeight.Normal,
+        ), labelSmall = TextStyle(
+            fontSize = dimensImpl.textOverlineSize.sp,
+            fontWeight = FontWeight.Normal,
         )
-         */
     )

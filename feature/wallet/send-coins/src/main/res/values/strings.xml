@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="send_coins_title">Send coins</string>
+
+    <string name="header_address_title">Address</string>
+    <string name="header_address_balance_title">Address balance</string>
+
+    <string name="dialog_current_address_title">Current address</string>
+
+    <string name="edit_address_to_send">Address to Send</string>
+    <string name="edit_amount">Amount</string>
+    <string name="edit_fee_amount">Fee amount</string>
+    <string name="button_send_coins">Send</string>
+    <string name="button_send_reset_sent_dialog">OK</string>
+
+    <string name="sending_coins_state_default">Preparing</string>
+    <string name="sending_coins_state_sending">Sending</string>
+    <string name="sending_coins_state_sent_error">Error</string>
+    <string name="sending_coins_state_sent_success">Coins were sent success!</string>
+
+    <string name="sending_coins_success_sub_body">Your transaction ID is</string>
+
+    <string name="error_sent_coins_unknown_error">Unknown error</string>
+
+
+</resources>

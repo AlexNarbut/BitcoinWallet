@@ -1,10 +1,9 @@
 package com.test.bitcoinappuikit.ui
 
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.sp
+import ru.alarmtrade.pandoracsinstaller.ui.view.buttons.CrButton
 
 @Composable
 fun InfoDialog(
@@ -15,18 +14,20 @@ fun InfoDialog(
 
     AlertDialog(
         onDismissRequest = onClose,
-        title = { Text(text = title, fontSize = 24.sp) },
+        title = { CrCustomText(
+            text = title,
+            textStyle = MaterialTheme.typography.titleSmall,
+        ) },
         text = {
-            Text(descr)
+            CrText(descr)
         },
         confirmButton = {
-            Button(
+            CrButton(
                 onClick = {
                     onClose()
-                }
-            ) {
-                Text("ОК")
-            }
+                },
+                text = "OK"
+            )
         },
     )
 }

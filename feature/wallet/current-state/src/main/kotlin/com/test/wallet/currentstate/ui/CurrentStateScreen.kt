@@ -32,7 +32,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -46,14 +45,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.test.bitcoinappuikit.composableDimens
 import com.test.bitcoinappuikit.lce.LCEState
 import com.test.bitcoinappuikit.lce.content
 import com.test.bitcoinappuikit.lce.render
 import com.test.bitcoinappuikit.lce.renderContent
+import com.test.bitcoinappuikit.string
+import com.test.bitcoinappuikit.ui.CrCustomText
+import com.test.bitcoinappuikit.ui.CrSubText
+import com.test.bitcoinappuikit.ui.CrSubTitleText
+import com.test.bitcoinappuikit.ui.CrText
+import com.test.bitcoinappuikit.ui.CrTitleText
 import com.test.bitcoinappuikit.ui.InfoDialog
 import com.test.bitcoinappuikit.ui.shimmerEffect
 import com.test.feature.wallet.sendcoins.R
@@ -91,7 +96,7 @@ internal fun CurrentStateScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Bitcoin wallet") }//stringResource(R.string.app_name)) },
+                title = { CrTitleText(text = string(R.string.current_state_title)) },
             )
         },
         modifier = modifier
@@ -100,7 +105,7 @@ internal fun CurrentStateScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 8.dp),
+                .padding(horizontal = composableDimens().marginSmallSize.dp),
         ) {
             Header(
                 headerState = { state.value.header },
@@ -109,7 +114,7 @@ internal fun CurrentStateScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(composableDimens().marginLargeSize.dp))
 
             TransactionList(
                 transactionListState = { state.value.transactions },
@@ -135,60 +140,55 @@ internal fun Header(
     Box(modifier) {
         Column(
             modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(composableDimens().marginSmallSize.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
                 painterResource(R.drawable.bitcoin_header),
                 contentDescription = "",
-                modifier = Modifier.size(64.dp)
+                modifier = Modifier.size(composableDimens().iconXLargeSize.dp)
             )
-            Spacer(Modifier.height(4.dp))
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                headerState.invoke().render(
-                    error = { error ->
-                        Text(
-                            error,
-                            modifier.clickable {
-                                onReload()
-                            }
-                        )
-                    },
-                    loading = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(0.5f)
-                                .shimmerEffect()
-                        )
-                    },
-                ) { info ->
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Row {
-                            Text(
-                                "Address balance: ${info.addressBalanceIntBtc}",
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                        Spacer(Modifier.height(8.dp))
-                        Row {
-                            Text(
-                                "Full balance: ${info.fullWalletBalanceIntBtc}",
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                    }
+            Spacer(Modifier.height(composableDimens().marginSmallSize.dp))
 
+            headerState.invoke().render(
+                error = { error ->
+                    CrText(
+                        error,
+                        modifier.clickable {
+                            onReload()
+                        }
+                    )
+                },
+                loading = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f)
+                            .shimmerEffect()
+                    )
+                },
+            ) { info ->
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Row {
+                        CrSubTitleText(
+                            "${string(R.string.current_state_header_address_balance)}: ${info.addressBalanceIntBtc}",
+                        )
+                    }
+                    Spacer(Modifier.height(composableDimens().marginSmallSize.dp))
+                    Row {
+                        CrText(
+                            "${string(R.string.current_state_header_full_balance)}: ${info.fullWalletBalanceIntBtc}",
+                        )
+                    }
                 }
             }
+
             AnimatedVisibility(
                 visible = sendVisibilityState.value
             ) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(composableDimens().marginLargeSize.dp),
                 ) {
                     IconButtonWithTitle(
                         title = "Send",
@@ -196,7 +196,7 @@ internal fun Header(
                         iconColor = MaterialTheme.colorScheme.onPrimary,
                         backgroundColor = MaterialTheme.colorScheme.primary,
                         onClick = onSend,
-                        iconModifier = Modifier.size(48.dp)
+                        iconModifier = Modifier.size(composableDimens().iconLargeSize.dp)
                     )
 
                     IconButtonWithTitle(
@@ -208,7 +208,7 @@ internal fun Header(
                             showAddressDialog.value =
                                 headerState.invoke().content?.currentAddress ?: ""
                         },
-                        iconModifier = Modifier.size(48.dp)
+                        iconModifier = Modifier.size(composableDimens().iconLargeSize.dp)
                     )
                 }
             }
@@ -219,13 +219,13 @@ internal fun Header(
             contentDescription = "Refresh state",
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .size(24.dp)
+                .size(composableDimens().iconSmallSize.dp)
                 .clickable { onReload() }
         )
     }
     if (!showAddressDialog.value.isNullOrEmpty()) {
         InfoDialog(
-            "Current address",
+            string(R.string.current_state_current_address_dialog_title),
             showAddressDialog.value ?: "",
             onClose = { showAddressDialog.value = null }
         )
@@ -246,8 +246,10 @@ internal fun TransactionList(
         modifier = modifier
     ) {
         Column {
-            Text("Transactions of selected address")
-            Spacer(Modifier.height(4.dp))
+            CrText(string(R.string.current_state_selected_address_trans))
+
+            Spacer(Modifier.height(composableDimens().marginXTinySize.dp))
+
             transactionListState.invoke().renderContent(
                 modifier,
                 onErrorButtonClick = {
@@ -260,7 +262,7 @@ internal fun TransactionList(
                     contentAlignment = Alignment.Center
                 ) {
                     if (content.isEmpty()) {
-                        Text(text = "No transactions")
+                        CrText(text = string(R.string.current_state_no_trans))
                     } else {
                         LazyColumn(
                             modifier = Modifier
@@ -273,7 +275,8 @@ internal fun TransactionList(
                             ) { transaction ->
                                 TransactionRow(
                                     modifier = Modifier
-                                        .fillMaxWidth(),
+                                        .fillMaxWidth()
+                                        .padding(composableDimens().marginTinySize.dp),
                                     transaction = transaction,
                                     onInfoClick = {
                                         uriHandler.openUri(it)
@@ -299,7 +302,6 @@ fun TransactionRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(8.dp)
             .clickable {
                 if (!transaction.informationUrl.isNullOrEmpty())
                     onInfoClick(transaction.informationUrl)
@@ -316,35 +318,33 @@ fun TransactionRow(
                 else Icons.Outlined.ArrowCircleUp,
                 contentDescription = "Transaction Icon",
                 tint = transaction.indicatorColor,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(composableDimens().iconMediumSize.dp)
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(composableDimens().marginSmallSize.dp))
 
             Column {
-                Text(
+                CrText(
                     text = transaction.type.toTitle(),
-                    style = MaterialTheme.typography.bodyMedium
                 )
-                Text(
+                CrSubText(
                     text = "ID ${transaction.transactionId}",
-                    style = MaterialTheme.typography.bodyMedium
                 )
 
-                if(transaction.timeString!= null){
-                    Text(
-                        text = "${transaction.timeString}",
-                        style = MaterialTheme.typography.bodySmall
+                if (transaction.timeString != null) {
+                    Spacer(modifier = Modifier.height(composableDimens().marginTinySize.dp))
+                    CrCustomText(
+                        text = transaction.timeString,
+                        textStyle = MaterialTheme.typography.labelSmall,
                     )
                 }
 
             }
         }
 
-        Text(
-            text = "${transaction.amountIntBtc}",
+        CrText(
+            text = transaction.amountIntBtc,
             color = transaction.indicatorColor,
-            style = MaterialTheme.typography.titleMedium
         )
     }
 }
@@ -371,13 +371,14 @@ fun IconButtonWithTitle(
         ) {
             Icon(imageVector, contentDescription = null, tint = iconColor)
         }
-        Text(title)
+        CrText(title)
     }
 }
 
+@Composable
 fun TransactionType.toTitle(): String = when (this) {
-    TransactionType.UNKNOWN -> "Unknown"
-    TransactionType.INCOME -> "Received"
-    TransactionType.EXPENSE -> "Sent"
-    TransactionType.SELF_TRANSFER -> "Self transfer"
+    TransactionType.UNKNOWN -> string(R.string.transaction_unknown_state)
+    TransactionType.INCOME -> string(R.string.transaction_income_state)
+    TransactionType.EXPENSE -> string(R.string.transaction_expense_state)
+    TransactionType.SELF_TRANSFER -> string(R.string.transaction_self_transfer_state)
 }

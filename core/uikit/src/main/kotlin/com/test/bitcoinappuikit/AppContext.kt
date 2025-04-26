@@ -3,9 +3,10 @@ package com.test.bitcoinappuikit
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.test.bitcoinappuikit.theme.DimensImpl
 import kotlinx.coroutines.flow.StateFlow
 
-class AppContext(private val context: Context) {
+class AppContext(private val context: Context, val dimensImpl: DimensImpl) {
     fun getString(resId: Int): String {
         return context.getString(resId)
     }
@@ -44,4 +45,16 @@ fun composableString(resId: Int, vararg formatArgs: Any): String {
 
 fun string(resId: Int, vararg formatArgs: Any): String {
     return ContextProvider.appContext.value.getString(resId, formatArgs)
+}
+
+@Composable
+fun composableDimens(): DimensImpl {
+    return LocalAppContext.current.dimensImpl
+}
+
+val Dimens
+    @Composable get() = LocalAppContext.current.dimensImpl
+
+fun dimens(): DimensImpl {
+    return ContextProvider.appContext.value.dimensImpl
 }

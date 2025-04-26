@@ -1,7 +1,7 @@
 package com.test.wallet.currentstate.logic
 
 import androidx.lifecycle.viewModelScope
-import com.test.bitcoinappuikit.base.BaseViewModel
+import com.test.bitcoinappuikit.vm.BaseViewModel
 import com.test.bitcoinappuikit.lce.LCEState
 import com.test.bitcoinappuikit.lce.applyFromExecuting
 import com.test.bitcoinappuikit.lce.ifSuccess
@@ -12,7 +12,6 @@ import com.test.common.exception.ErrorMessageFactory
 import com.test.wallet.currentstate.mapper.getHeaderState
 import com.test.wallet.currentstate.mapper.toViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

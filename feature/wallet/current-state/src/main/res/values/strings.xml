@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="current_state_title">Bitcoin wallet</string>
+
+    <string name="current_state_header_address_balance">Address balance</string>
+    <string name="current_state_header_full_balance">Full balance</string>
+
+    <string name="current_state_current_address_dialog_title">Current address</string>
+
+    <string name="current_state_selected_address_trans">Transactions of selected address</string>
+    <string name="current_state_no_trans">No transactions</string>
+
+    <string name="transaction_unknown_state">Unknown</string>
+    <string name="transaction_income_state">Received</string>
+    <string name="transaction_expense_state">Sent</string>
+    <string name="transaction_self_transfer_state">Self transfer</string>
+</resources>

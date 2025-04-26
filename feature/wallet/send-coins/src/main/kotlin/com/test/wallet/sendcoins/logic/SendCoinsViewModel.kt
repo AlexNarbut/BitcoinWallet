@@ -1,7 +1,7 @@
 package com.test.wallet.sendcoins.logic
 
 import androidx.lifecycle.viewModelScope
-import com.test.bitcoinappuikit.base.BaseViewModel
+import com.test.bitcoinappuikit.vm.BaseViewModel
 import com.test.bitcoinappuikit.lce.LCEState
 import com.test.bitcoinappuikit.lce.applyFromExecuting
 import com.test.bitcoinappuikit.lce.content
