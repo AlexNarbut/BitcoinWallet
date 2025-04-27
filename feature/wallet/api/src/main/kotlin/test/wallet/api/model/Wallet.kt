@@ -21,6 +21,6 @@ interface Wallet {
     suspend fun sendCoins(
         destinationAddress: String,
         amount: Long,
-        feeAmount: Long
+        neededFeeAmount: Long?
     ): Response<TransactionSendResult>
 }

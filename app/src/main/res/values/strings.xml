@@ -7,8 +7,9 @@
     <string name="error_wallet_profile_not_initialized">Wallet profile is not initialized. Try later</string>
     <string name="error_wallet_profile_not_load_from_file">Wallet profile is not load from file. Try later</string>
 
-    <string name="error_transaction_not_enough_coins">Not enough coins for transaction. Change amount and try again</string>
+    <string name="error_transaction_not_enough_coins">Not enough coins for transaction. Your request in Sat is %1$s, needed coins with fee are %2$s. Change amount and try again</string>
     <string name="error_transaction_utxo_not_found">Not found needed utxo for transaction. Change amount and try again</string>
+    <string name="error_transaction_send_error">An error occurred while sending transaction hex to the server. Change amount and try again</string>
 
 
     <string name="error_network_is_not_available">Internet connection error. Check the internet connection and try again</string>

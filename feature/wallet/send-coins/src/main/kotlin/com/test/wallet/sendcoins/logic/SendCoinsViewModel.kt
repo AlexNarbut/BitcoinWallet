@@ -39,8 +39,7 @@ class SendCoinsViewModel @Inject constructor(
 
     private val _addressStateFlow = MutableStateFlow<LCEState<String>>(LCEState.None)
     private val _balanceStateFlow = MutableStateFlow<LCEState<WalletBalanceInfo>>(LCEState.None)
-    private val _sendFormStateFlow =
-        MutableStateFlow(SendFormState(feeAmount = EditTextState(str = FIX_FEE_AMOUNT_IN_TBTC)))
+    private val _sendFormStateFlow = MutableStateFlow(SendFormState())
     private val _sendStateFlow = MutableStateFlow<SendState>(SendState.Default)
 
     val screenState: StateFlow<SendCoinsScreenState> = combine(
@@ -54,11 +53,9 @@ class SendCoinsViewModel @Inject constructor(
         val currentAddress = addressState.content
         val isAddressValid = isValidElectrumAddress(form.sendAddress.str)
         val isAmountValid = form.sendAmount.str.isAmountValid()
-        val isFeeAmountValid = form.feeAmount.str.isAmountValid()
         val isDifferentAddresses = form.sendAddress.str != currentAddress
         val canSend = isAddressValid
                 && isAmountValid
-                && isFeeAmountValid
                 && isDifferentAddresses
                 && sendState != SendState.Sending
 
@@ -67,7 +64,6 @@ class SendCoinsViewModel @Inject constructor(
             sendFormState = SendFormState(
                 sendAddress = form.sendAddress.copy(isValid = isAddressValid),
                 sendAmount = form.sendAmount.copy(isValid = isAmountValid),
-                feeAmount = form.feeAmount.copy(isValid = isFeeAmountValid),
                 isVisible = headerState.isSuccess(),
                 canSend = canSend
             ),
@@ -86,7 +82,7 @@ class SendCoinsViewModel @Inject constructor(
         }
     }
 
-    fun updateWalletProfile(reload : Boolean = true) {
+    fun updateWalletProfile(reload: Boolean = true) {
         updateWalletProfileJob?.cancel()
         updateWalletProfileJob = safeLaunch(appDispatcher.io) {
             _addressStateFlow.applyFromExecuting(
@@ -131,15 +127,6 @@ class SendCoinsViewModel @Inject constructor(
         }
     }
 
-    fun enterFeeAmount(amount: String) {
-        editorJob?.cancel()
-        editorJob = viewModelScope.launch(appDispatcher.io) {
-            _sendFormStateFlow.update {
-                it.copy(feeAmount = EditTextState(amount))
-            }
-        }
-    }
-
     fun send() {
         sendJob?.cancel()
         sendJob = viewModelScope.launch(appDispatcher.io) {
@@ -151,20 +138,16 @@ class SendCoinsViewModel @Inject constructor(
 
             val address = screenState.sendFormState.sendAddress.str.trim()
             val amount = screenState.sendFormState.sendAmount.str.trim()
-            val feeAmount = screenState.sendFormState.feeAmount.str.trim()
 
             if (!isValidElectrumAddress(address)) return@launch
             if (!amount.isAmountValid()) return@launch
             val amountToSatoshi =
                 amount.safeToBigDecimal()?.btcToMempoolSatoshi(RoundingMode.UP) ?: return@launch
-            val feeAmountToSatoshi =
-                feeAmount.safeToBigDecimal()?.btcToMempoolSatoshi(RoundingMode.UP) ?: return@launch
 
             _sendStateFlow.update { SendState.Sending }
             walletInteractionRepository.sendCoins(
                 destinationAddress = address,
                 amount = amountToSatoshi,
-                feeAmount = feeAmountToSatoshi
             ).alsoIfSuccess { response ->
                 _sendStateFlow.update {
                     SendState.SentSuccess(
@@ -187,6 +170,5 @@ class SendCoinsViewModel @Inject constructor(
 
     companion object {
         private val decimalRegex = Regex("""^[+-]?(\d+([.]\d{0,12})?|[.]\d{1,12})${'$'}""")
-        private const val FIX_FEE_AMOUNT_IN_TBTC = "0.0000025"
     }
 }

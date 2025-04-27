@@ -128,7 +128,6 @@ internal fun SendCoinsScreen(
                     sendFormState = { state.value.sendFormState },
                     onAddressChange = { vm.enterSendAddress(it) },
                     onAmountChange = { vm.enterSendAmount(it) },
-                    onFeeAmountChange = { vm.enterFeeAmount(it) },
                     onSend = { vm.send() },
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -222,7 +221,6 @@ internal fun SendForm(
     sendFormState: () -> SendFormState,
     onAddressChange: (String) -> Unit,
     onAmountChange: (String) -> Unit,
-    onFeeAmountChange: (String) -> Unit,
     onSend: () -> Unit,
     modifier: Modifier
 ) {
@@ -248,15 +246,6 @@ internal fun SendForm(
                 label = { CrSubText(string(R.string.edit_amount)) },
                 modifier = modifier,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-
-            TextField(
-                value = sendFormState.invoke().feeAmount.str,
-                isError = !sendFormState.invoke().feeAmount.isValid,
-                onValueChange = onFeeAmountChange,
-                label = { CrSubText(string(R.string.edit_fee_amount)) },
-                modifier = modifier,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             )
 
             CrButton(

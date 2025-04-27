@@ -2,11 +2,15 @@ package com.test.transaction.data.repository
 
 import com.test.common.response.Response
 import com.test.common.response.ResponseType
+import com.test.commonextens.response.asNetworkError
+import com.test.commonextens.response.mapIfError
 import com.test.commonextens.response.mapValueIfSuccess
 import com.test.commonextens.response.toResponse
 import com.test.mempoolapi.MempoolApi
 import com.test.mempoolapi.getMempoolTransactionInfoUrl
 import com.test.transaction.data.mapper.toDomain
+import test.transaction.api.exception.TransactionSendErrorException
+import test.transaction.api.model.RecommendedFee
 import test.transaction.api.model.TransactionInfo
 import test.transaction.api.model.TransactionSendResult
 import test.transaction.api.repository.TransactionRepository
@@ -37,6 +41,19 @@ class TransactionRepositoryImpl(
                 TransactionSendResult(
                     txid,
                     getMempoolTransactionInfoUrl(txid)
+                )
+            }.mapIfError { TransactionSendErrorException(it.exception,it.message).asNetworkError() }
+    }
+
+    override suspend fun getRecommendedFee(): Response<RecommendedFee> {
+        return mempoolApi.getRecommendedFees().toResponse(ResponseType.NETWORK)
+            .mapValueIfSuccess {
+                RecommendedFee(
+                    it.fastestFee,
+                    it.halfHourFee,
+                    it.hourFee,
+                    it.economyFee,
+                    it.minimumFee,
                 )
             }
     }

@@ -89,9 +89,9 @@ class WalletInteractionRepositoryImpl(
     override suspend fun sendCoins(
         destinationAddress: String,
         amount: Long,
-        feeAmount: Long
+        neededFeeAmount: Long?
     ): Response<TransactionSendResult> = executeWithProfile { wallet ->
-        wallet.sendCoins(destinationAddress, amount, feeAmount)
+        wallet.sendCoins(destinationAddress, amount, neededFeeAmount)
     }
 
     override suspend fun release(): Response<Unit> = initMutex.withLock {

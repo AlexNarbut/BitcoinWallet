@@ -25,7 +25,7 @@ interface WalletInteractionRepository {
     suspend fun sendCoins(
         destinationAddress: String,
         amount: Long,
-        feeAmount: Long
+        neededFeeAmount: Long? = null
     ): Response<TransactionSendResult>
 
     suspend fun release(): Response<Unit>

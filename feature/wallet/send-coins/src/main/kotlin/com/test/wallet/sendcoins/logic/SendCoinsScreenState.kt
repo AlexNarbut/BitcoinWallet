@@ -20,7 +20,6 @@ data class SendCoinsWalletState(
 data class SendFormState(
     val sendAddress: EditTextState = EditTextState(),
     val sendAmount: EditTextState = EditTextState(),
-    val feeAmount: EditTextState = EditTextState(),
     val isVisible: Boolean = false,
     val canSend: Boolean = false,
 )

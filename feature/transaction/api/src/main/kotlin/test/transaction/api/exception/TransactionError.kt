@@ -11,6 +11,13 @@ class TransactionUtxoNotFoundException(
 ) : TransactionException(cause,message)
 
 class TransactionNotEnoughCoinsException(
+    val inputCoinsInSat : Long,
+    val neededCoinsWithFeeInSat : Long,
+    cause: Throwable? = null,
+    message: String? = null,
+) : TransactionException(cause,message)
+
+class TransactionSendErrorException(
     cause: Throwable? = null,
     message: String? = null,
 ) : TransactionException(cause,message)

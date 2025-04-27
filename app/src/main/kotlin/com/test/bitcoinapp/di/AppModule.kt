@@ -93,6 +93,5 @@ object AppModule {
         )
 
     @Provides
-    @Singleton
     fun provideErrorMessageFactory(): ErrorMessageFactory = AppErrorMessageFactory()
 }

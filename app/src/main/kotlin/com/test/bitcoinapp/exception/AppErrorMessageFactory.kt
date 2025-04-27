@@ -5,6 +5,7 @@ import com.test.bitcoinappuikit.string
 import com.test.common.exception.ErrorMessageFactory
 import test.transaction.api.exception.TransactionException
 import test.transaction.api.exception.TransactionNotEnoughCoinsException
+import test.transaction.api.exception.TransactionSendErrorException
 import test.transaction.api.exception.TransactionUtxoNotFoundException
 import test.wallet.api.exception.WalletAddressBalanceNotFoundException
 import test.wallet.api.exception.WalletAddressBalanceNotMappedException
@@ -32,8 +33,14 @@ class AppErrorMessageFactory @Inject constructor() : ErrorMessageFactory {
 
             is TransactionException -> {
                 when (exception) {
-                    is TransactionNotEnoughCoinsException -> string(R.string.error_transaction_not_enough_coins)
+                    is TransactionNotEnoughCoinsException -> string(
+                        R.string.error_transaction_not_enough_coins,
+                        exception.inputCoinsInSat,
+                        exception.neededCoinsWithFeeInSat
+                    )
+
                     is TransactionUtxoNotFoundException -> string(R.string.error_transaction_utxo_not_found)
+                    is TransactionSendErrorException -> string(R.string.error_transaction_send_error)
                     else -> string(R.string.error_default)
                 }
             }

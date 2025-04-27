@@ -4,7 +4,6 @@ package com.test.wallet.data.model.wallet
 
 import com.test.common.response.Response
 import com.test.commonextens.response.alsoIfError
-import com.test.commonextens.response.alsoIfSuccess
 import com.test.commonextens.response.asResponse
 import com.test.commonextens.response.getValueIfSuccess
 import com.test.commonextens.response.mapValueIfSuccess
@@ -109,7 +108,7 @@ class BitcoinSignetWallet(
     override suspend fun sendCoins(
         destinationAddress: String,
         amount: Long,
-        feeAmount: Long
+        neededFeeAmount: Long?
     ): Response<TransactionSendResult> {
         return currentAddress.load()
             ?.let { address ->
@@ -118,7 +117,7 @@ class BitcoinSignetWallet(
                     address.primaryKey,
                     destinationAddress,
                     amount,
-                    feeAmount
+                    neededFeeAmount
                 )
             }
             ?: Response.Error.General(
@@ -131,14 +130,14 @@ class BitcoinSignetWallet(
         key: String,
         destinationAddress: String,
         amount: Long,
-        feeAmount: Long
+        neededFeeAmount: Long?
     ): Response<TransactionSendResult> {
         return transactionBuilder.createSendTransactionHex(
             walletAddress = walletAddress,
             primaryKey = key,
             destinationAddress = destinationAddress,
             amount = amount,
-            feeAmount = feeAmount
+            neededFeeAmount = neededFeeAmount
         ).mapValueIfSuccess { hex ->
             return transactionRepository.send(SendTransactionRequest(hex))
         }

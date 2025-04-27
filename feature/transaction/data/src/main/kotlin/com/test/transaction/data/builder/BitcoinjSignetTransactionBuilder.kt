@@ -4,6 +4,7 @@ import com.test.common.response.Response
 import com.test.commonextens.response.asGeneralError
 import com.test.commonextens.response.asResponse
 import com.test.commonextens.response.getValueIfSuccess
+import com.test.commonextens.response.mapValueIfSuccess
 import com.test.commonextens.response.safeRun
 import org.bitcoinj.base.AddressParser
 import org.bitcoinj.base.BitcoinNetwork
@@ -30,30 +31,37 @@ class BitcoinjSignetTransactionBuilder(
     private val transactionRepository: TransactionRepository
 ) : TransactionBuilder {
 
+    @OptIn(ExperimentalStdlibApi::class)
     override suspend fun createSendTransactionHex(
         walletAddress: String,
         primaryKey: String,
         destinationAddress: String,
         amount: Long,
-        feeAmount: Long
+        neededFeeAmount: Long?
     ): Response<String> {
         val transactionInfoResult = transactionRepository.getAddressTransaction(
             GetTransactionsRequest(walletAddress)
         )
         if (transactionInfoResult is Response.Error) return transactionInfoResult
 
-        val utxoParams = findSuitableUtxo(
-            transactionInfoResult.getValueIfSuccess() ?: emptyList(),
-            amount, feeAmount
-        ) ?: return TransactionUtxoNotFoundException(message =  "Utxo Not Found").asGeneralError()
 
-        return prepareTransaction(
-            utxoParams,
+        val feeResponse = calculateFeeIfNeeded(
+            neededFeeAmount,
+            transactionInfoResult.getValueIfSuccess() ?: emptyList(),
             primaryKey,
             destinationAddress,
             amount,
-            feeAmount
         )
+
+        if (feeResponse is Response.Error) return feeResponse
+
+        return prepareTransaction(
+            transactionInfoResult.getValueIfSuccess() ?: emptyList(),
+            primaryKey,
+            destinationAddress,
+            amount,
+            feeResponse.getValueIfSuccess() ?: DEFAULT_FEE
+        ).mapValueIfSuccess { it.toHexString() }
     }
 
     private fun findSuitableUtxo(
@@ -81,23 +89,24 @@ class BitcoinjSignetTransactionBuilder(
         return null
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     private fun prepareTransaction(
-        utxoSendParams: UtxoSendParams,
+        walletAddressTransactions: List<TransactionInfo>,
         primaryKey: String,
         destinationAddress: String,
         amount: Long,
         feeAmount: Long,
-    ): Response<String> = safeRun {
+    ): Response<ByteArray> = safeRun {
+        val utxoParams = findSuitableUtxo(
+            walletAddressTransactions,
+            amount,
+            feeAmount
+        ) ?: return TransactionUtxoNotFoundException(message = "Utxo Not Found").asGeneralError()
+
+
         Context.propagate(Context())
-
-        // Base network settings
-        val scriptType = ScriptType.P2WPKH
-        val network = BitcoinNetwork.SIGNET
-
         // Get dumped private key from P2WPKH
         val cleanKey = primaryKey.substringAfter(':')
-        val key = DumpedPrivateKey.fromBase58(network, cleanKey).key
+        val key = DumpedPrivateKey.fromBase58(NETWORK, cleanKey).key
 
         val addressParser = AddressParser.getDefault()
         val toAddress = addressParser.parseAddress(destinationAddress)
@@ -105,14 +114,18 @@ class BitcoinjSignetTransactionBuilder(
         val sendAmount = Coin.valueOf(amount)
 
         // Total sum of outputs (UTXO)
-        val totalInput = Coin.valueOf(utxoSendParams.valueInSat)
+        val totalInput = Coin.valueOf(utxoParams.valueInSat)
         // Commission to miners.
         // Min 220 satoshi, otherwise you will get "min relay fee not met, 1 < 220" from backend
         val fee = Coin.valueOf(feeAmount)
 
         // We check if there are enough funds to send, taking into account the commission
         if (totalInput.subtract(sendAmount) < fee) {
-            return TransactionNotEnoughCoinsException(message = "Not enough funds to send transaction with fee").asGeneralError()
+            return TransactionNotEnoughCoinsException(
+                inputCoinsInSat = totalInput.value,
+                neededCoinsWithFeeInSat = sendAmount.value + fee.value,
+                message = "Not enough funds to send transaction with fee"
+            ).asGeneralError()
         }
 
         val transaction = Transaction()
@@ -123,18 +136,18 @@ class BitcoinjSignetTransactionBuilder(
         val change = totalInput.subtract(sendAmount).subtract(fee)
         if (change.isPositive) {
             // Important: add change to the sender's address
-            transaction.addOutput(change, key.toAddress(scriptType, network))
+            transaction.addOutput(change, key.toAddress(SCRIPT_TYPE, NETWORK))
         }
 
         // UTXO - transaction from which we spend
-        val utxo = Sha256Hash.wrap(utxoSendParams.txId)
-        val outPoint = TransactionOutPoint(utxoSendParams.vOutIndex, utxo)
+        val utxo = Sha256Hash.wrap(utxoParams.txId)
+        val outPoint = TransactionOutPoint(utxoParams.vOutIndex, utxo)
         val input =
             TransactionInput(
                 transaction,
                 byteArrayOf(),
                 outPoint,
-                Coin.valueOf(utxoSendParams.valueInSat)
+                Coin.valueOf(utxoParams.valueInSat)
             )
 
         // Add input. Important: need to add it after adding of outputs
@@ -150,7 +163,7 @@ class BitcoinjSignetTransactionBuilder(
                 i,
                 key,
                 scriptCode,
-                Coin.valueOf(utxoSendParams.valueInSat),
+                Coin.valueOf(utxoParams.valueInSat),
                 Transaction.SigHash.ALL,
                 false
             )
@@ -159,10 +172,44 @@ class BitcoinjSignetTransactionBuilder(
 
         // Convert the transaction to HEX for sending.
         // We need to send only HEX as a plain text.
-        return transaction.serialize().toHexString().asResponse()
+        return transaction.serialize().asResponse()
     }
+
+    private suspend fun calculateFeeIfNeeded(
+        neededFeeAmount: Long?,
+        transactions: List<TransactionInfo>,
+        primaryKey: String,
+        destinationAddress: String,
+        amount: Long,
+    ): Response<Long> {
+        if (neededFeeAmount != null) return neededFeeAmount.asResponse()
+
+        val defaultTransactionResponse = prepareTransaction(
+            transactions,
+            primaryKey,
+            destinationAddress,
+            amount,
+            DEFAULT_FEE
+        )
+
+        if (defaultTransactionResponse is Response.Error) return defaultTransactionResponse
+
+        val feeRateResponse = transactionRepository.getRecommendedFee()
+        if (feeRateResponse is Response.Error) return feeRateResponse
+
+        val byteSize = (defaultTransactionResponse.getValueIfSuccess()?.size ?: 0)
+        val feeRate = feeRateResponse.getValueIfSuccess()?.economyFeeInSat?:0
+        return (byteSize * feeRate).asResponse()
+    }
+
 
     companion object {
         private const val DUST_THRESHOLD = 300
+
+        private const val DEFAULT_FEE = 1L
+
+        // Base network settings
+        val SCRIPT_TYPE = ScriptType.P2WPKH
+        val NETWORK = BitcoinNetwork.SIGNET
     }
 }
