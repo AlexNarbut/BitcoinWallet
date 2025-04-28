@@ -70,6 +70,16 @@ class WalletInteractionRepositoryImpl(
             wallet.getCurrentWalletAddress()
         }
 
+    override suspend fun getCurrentWalletAddressFlow(): Flow<Response<String>> =
+        executeFlowWithProfile { wallet ->
+            wallet.getWalletAddressFlow()
+        }
+
+    override suspend fun getAvailableWalletAddresses(): Response<List<String>> =
+        executeWithProfile { wallet ->
+            wallet.getAvailableWalletAddresses()
+        }
+
     override suspend fun getWalletBalance(): Response<WalletBalanceInfo> =
         executeWithProfile { wallet ->
             wallet.getWalletBalance()
@@ -114,7 +124,7 @@ class WalletInteractionRepositoryImpl(
                     Response.Error.General(
                         WalletProfileNotInitializedException(
                             cause = initResponse.exception,
-                            message = "Wallet is not initialized ${initResponse.message?.let { "($it)" }?:""}"
+                            message = "Wallet is not initialized ${initResponse.message?.let { "($it)" } ?: ""}"
                         )
                     )
                 }
@@ -136,7 +146,7 @@ class WalletInteractionRepositoryImpl(
                         Response.Error.General(
                             WalletProfileNotInitializedException(
                                 cause = initResponse.exception,
-                                message = "Wallet is not initialized ${initResponse.message?.let { "($it)"}?:""}"
+                                message = "Wallet is not initialized ${initResponse.message?.let { "($it)" } ?: ""}"
                             )
                         )
                     )

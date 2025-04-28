@@ -15,6 +15,11 @@ class WalletProfileNotLoadFromFileException(
     message: String? = null,
 ) : WalletProfileException(cause,message)
 
+class WalletAddressNotSelectedException(
+    cause: Throwable? = null,
+    message: String? = null,
+) : WalletProfileException(cause,message)
+
 class WalletAddressBalanceNotMappedException(
     cause: Throwable? = null,
     message: String? = null,

@@ -13,6 +13,7 @@ import test.wallet.api.provider.WalletAddressInfosProvider
 import test.wallet.api.repository.interaction.WalletInteractionRepository
 import test.wallet.api.repository.profile.WalletProfileRepository
 import java.util.UUID
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -37,6 +38,7 @@ object WalletModule {
     }
 
     @Provides
+    @Singleton
     fun provideWalletInteractionRepository(
         bitcoinWalletFactory: BitcoinWalletFactory,
         profileRepository: WalletProfileRepository

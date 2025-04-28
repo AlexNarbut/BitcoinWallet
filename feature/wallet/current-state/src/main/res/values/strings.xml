@@ -5,6 +5,8 @@
     <string name="current_state_header_address_balance">Address balance</string>
     <string name="current_state_header_full_balance">Full balance</string>
 
+    <string name="current_state_header_available_addresses">Available addresses</string>
+
     <string name="current_state_current_address_dialog_title">Current address</string>
 
     <string name="current_state_selected_address_trans">Transactions of selected address</string>

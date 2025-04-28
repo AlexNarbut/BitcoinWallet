@@ -9,6 +9,7 @@ import test.transaction.api.exception.TransactionSendErrorException
 import test.transaction.api.exception.TransactionUtxoNotFoundException
 import test.wallet.api.exception.WalletAddressBalanceNotFoundException
 import test.wallet.api.exception.WalletAddressBalanceNotMappedException
+import test.wallet.api.exception.WalletAddressNotSelectedException
 import test.wallet.api.exception.WalletProfileException
 import test.wallet.api.exception.WalletProfileNotInitializedException
 import test.wallet.api.exception.WalletProfileNotLoadFromFileException
@@ -27,6 +28,7 @@ class AppErrorMessageFactory @Inject constructor() : ErrorMessageFactory {
                     is WalletAddressBalanceNotMappedException -> string(R.string.error_wallet_address_balance_not_mapped)
                     is WalletProfileNotInitializedException -> string(R.string.error_wallet_profile_not_initialized)
                     is WalletProfileNotLoadFromFileException -> string(R.string.error_wallet_profile_not_load_from_file)
+                    is WalletAddressNotSelectedException -> string(R.string.error_wallet_address_not_selected)
                     else -> string(R.string.error_default)
                 }
             }

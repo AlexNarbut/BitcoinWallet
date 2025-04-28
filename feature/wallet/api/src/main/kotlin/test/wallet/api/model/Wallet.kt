@@ -1,6 +1,7 @@
 package test.wallet.api.model
 
 import com.test.common.response.Response
+import kotlinx.coroutines.flow.Flow
 import test.transaction.api.model.TransactionHistoryInfo
 import test.transaction.api.model.TransactionSendResult
 
@@ -12,6 +13,9 @@ interface Wallet {
 
     suspend fun setCurrentWalletAddress(address: String): Response<Unit>
     suspend fun getCurrentWalletAddress(): Response<String>
+    fun getWalletAddressFlow(): Flow<Response<String>>
+
+    suspend fun getAvailableWalletAddresses(): Response<List<String>>
 
     suspend fun getWalletBalance(): Response<WalletBalanceInfo>
     suspend fun getAddressBalance(address: String): Response<WalletAddressBalanceInfo>

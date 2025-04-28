@@ -59,6 +59,7 @@ import com.test.bitcoinappuikit.ui.CrSubText
 import com.test.bitcoinappuikit.ui.CrSubTitleText
 import com.test.bitcoinappuikit.ui.CrText
 import com.test.bitcoinappuikit.ui.CrTitleText
+import com.test.bitcoinappuikit.ui.DropdownSelector
 import com.test.bitcoinappuikit.ui.InfoDialog
 import com.test.bitcoinappuikit.ui.shimmerEffect
 import com.test.feature.wallet.sendcoins.R
@@ -111,6 +112,7 @@ internal fun CurrentStateScreen(
                 headerState = { state.value.header },
                 onReload = { vm.updateWalletProfile() },
                 onSend = onSendCoins,
+                onAddressSelect = { vm.onChangeAddressState(it) },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -132,6 +134,7 @@ internal fun Header(
     headerState: () -> LCEState<CurrentStateHeader>,
     onSend: () -> Unit,
     onReload: () -> Unit,
+    onAddressSelect: (String) -> Unit,
     modifier: Modifier
 ) {
     val sendVisibilityState = rememberUpdatedState(headerState.invoke().content != null)
@@ -187,29 +190,48 @@ internal fun Header(
             AnimatedVisibility(
                 visible = sendVisibilityState.value
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(composableDimens().marginLargeSize.dp),
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(composableDimens().marginLargeSize.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    IconButtonWithTitle(
-                        title = "Send",
-                        imageVector = Icons.Default.ArrowUpward,
-                        iconColor = MaterialTheme.colorScheme.onPrimary,
-                        backgroundColor = MaterialTheme.colorScheme.primary,
-                        onClick = onSend,
-                        iconModifier = Modifier.size(composableDimens().iconLargeSize.dp)
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(composableDimens().marginLargeSize.dp),
+                    ) {
+                        IconButtonWithTitle(
+                            title = "Send",
+                            imageVector = Icons.Default.ArrowUpward,
+                            iconColor = MaterialTheme.colorScheme.onPrimary,
+                            backgroundColor = MaterialTheme.colorScheme.primary,
+                            onClick = onSend,
+                            iconModifier = Modifier.size(composableDimens().iconLargeSize.dp)
+                        )
 
-                    IconButtonWithTitle(
-                        title = "Address",
-                        imageVector = Icons.Default.Info,
-                        iconColor = MaterialTheme.colorScheme.onPrimary,
-                        backgroundColor = MaterialTheme.colorScheme.primary,
-                        onClick = {
-                            showAddressDialog.value =
-                                headerState.invoke().content?.currentAddress ?: ""
-                        },
-                        iconModifier = Modifier.size(composableDimens().iconLargeSize.dp)
-                    )
+                        IconButtonWithTitle(
+                            title = "Address",
+                            imageVector = Icons.Default.Info,
+                            iconColor = MaterialTheme.colorScheme.onPrimary,
+                            backgroundColor = MaterialTheme.colorScheme.primary,
+                            onClick = {
+                                showAddressDialog.value =
+                                    headerState.invoke().content?.currentAddress ?: ""
+                            },
+                            iconModifier = Modifier.size(composableDimens().iconLargeSize.dp)
+                        )
+                    }
+
+                    if ((headerState.invoke().content?.addressList?.addressList?.size ?: 0) > 1) {
+                        DropdownSelector(
+                            items = headerState.invoke().content?.addressList?.addressList
+                                ?: emptyList(),
+                            currentValue = headerState.invoke().content?.currentAddress ?: "",
+                            title = string(R.string.current_state_header_available_addresses),
+                            onValueChange = onAddressSelect,
+                            modifier = Modifier
+                                .padding(composableDimens().marginSmallSize.dp)
+                                .fillMaxWidth()
+                        )
+                    }
+
                 }
             }
 

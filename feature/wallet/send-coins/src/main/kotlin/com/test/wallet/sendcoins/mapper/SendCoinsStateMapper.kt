@@ -9,8 +9,6 @@ import com.test.wallet.sendcoins.logic.SendCoinsWalletState
 import test.wallet.api.model.WalletAddressBalanceInfo
 import test.wallet.api.model.WalletBalanceInfo
 
-private const val M_BTC_DIVIDER = 100_000.0
-
 internal fun getHeaderState(
     addressState: LCEState<String>,
     balanceInfoState: LCEState<WalletBalanceInfo>

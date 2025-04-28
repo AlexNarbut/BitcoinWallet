@@ -7,6 +7,7 @@ import com.test.bitcoinappuikit.lce.content
 import com.test.common.utls.shortCryptoAddress
 import com.test.transaction.data.utils.mempoolSatoshiTotBtc
 import com.test.transaction.data.utils.tBtcString
+import com.test.wallet.currentstate.logic.AddressListState
 import com.test.wallet.currentstate.logic.CurrentStateHeader
 import com.test.wallet.currentstate.logic.TransactionHistoryInfoViewModel
 import test.transaction.api.model.TransactionHistoryInfo
@@ -20,18 +21,27 @@ import java.util.Locale
 
 internal fun getHeaderState(
     addressState: LCEState<String>,
+    addressListState: LCEState<List<String>>,
     balanceInfoState: LCEState<WalletBalanceInfo>
 ): LCEState<CurrentStateHeader> {
     if (addressState is LCEState.Error) return addressState
+    if (addressListState is LCEState.Error) return addressListState
     if (balanceInfoState is LCEState.Error) return balanceInfoState
 
     if (addressState is LCEState.None) return addressState
+    if (addressListState is LCEState.None) return addressListState
     if (balanceInfoState is LCEState.None) return balanceInfoState
 
     if (addressState is LCEState.Loading) return LCEState.Loading
+    if (addressListState is LCEState.Loading) return LCEState.Loading
     if (balanceInfoState is LCEState.Loading) return LCEState.Loading
     else {
         val addressContent = addressState.content ?: ""
+
+        val addressList = addressListState.content ?: emptyList()
+        val addressListContent =
+            AddressListState(addressList, addressList.indexOfFirst { it == addressContent })
+
         val balanceInfoListContent = balanceInfoState.content ?: WalletBalanceInfo.Default
         val addressBalanceContent = balanceInfoListContent.addressBalances
             .firstOrNull { it.address == addressContent }
@@ -39,8 +49,9 @@ internal fun getHeaderState(
 
         return CurrentStateHeader(
             addressContent,
-            addressBalanceContent.amountInSat.mempoolSatoshiTotBtc().tBtcString()+ " tBTC",
-            balanceInfoListContent.fullAmountInSat.mempoolSatoshiTotBtc().tBtcString()+ " tBTC"
+            addressListContent,
+            addressBalanceContent.amountInSat.mempoolSatoshiTotBtc().tBtcString() + " tBTC",
+            balanceInfoListContent.fullAmountInSat.mempoolSatoshiTotBtc().tBtcString() + " tBTC"
         ).asLCEState()
     }
 }
@@ -49,15 +60,14 @@ internal fun TransactionHistoryInfo.toViewModel(): TransactionHistoryInfoViewMod
     return TransactionHistoryInfoViewModel(
         transactionId = transactionInfo.id.shortCryptoAddress(),
         type = transactionType,
-        timeString = transactionInfo.blockTime?.let { formatter.format(it)},
-        amountIntBtc = amountInSat.mempoolSatoshiTotBtc().tBtcString()+ " tBTC",
+        timeString = transactionInfo.blockTime?.let { formatter.format(it) },
+        amountIntBtc = amountInSat.mempoolSatoshiTotBtc().tBtcString() + " tBTC",
         indicatorColor = transactionType.toIndicatorColor(),
         informationUrl = transactionInfo.informationUrl
     )
 }
 
 private val formatter: DateFormat = SimpleDateFormat("HH:mm:ss dd-MM-yyyy", Locale.US)
-
 
 
 internal fun TransactionType.toIndicatorColor(): Color = when (this) {

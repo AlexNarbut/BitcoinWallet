@@ -1,13 +1,14 @@
-@file:OptIn(ExperimentalAtomicApi::class, ExperimentalAtomicApi::class)
-
 package com.test.wallet.data.model.wallet
 
 import com.test.common.response.Response
+import com.test.commonextens.Logger
 import com.test.commonextens.response.alsoIfError
+import com.test.commonextens.response.asGeneralError
 import com.test.commonextens.response.asResponse
 import com.test.commonextens.response.getValueIfSuccess
 import com.test.commonextens.response.mapValueIfSuccess
 import com.test.wallet.data.mapper.toHistory
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -15,6 +16,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import test.transaction.api.builder.TransactionBuilder
 import test.transaction.api.model.TransactionHistoryInfo
 import test.transaction.api.model.TransactionSendResult
@@ -22,14 +27,13 @@ import test.transaction.api.repository.TransactionRepository
 import test.transaction.api.repository.param.GetTransactionsRequest
 import test.transaction.api.repository.param.SendTransactionRequest
 import test.wallet.api.exception.WalletAddressBalanceNotFoundException
+import test.wallet.api.exception.WalletAddressNotSelectedException
 import test.wallet.api.model.Wallet
 import test.wallet.api.model.WalletAddressInfo
 import test.wallet.api.model.WalletAddressBalanceInfo
 import test.wallet.api.model.WalletBalanceInfo
 import test.wallet.api.model.WalletProfile
 import test.wallet.api.repository.profile.WalletProfileRepository
-import kotlin.concurrent.atomics.AtomicReference
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 class BitcoinSignetWallet(
     override val walletProfile: WalletProfile,
@@ -38,8 +42,14 @@ class BitcoinSignetWallet(
     private val transactionBuilder: TransactionBuilder
 ) : Wallet {
 
-    private val walletScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val currentAddress = AtomicReference<WalletAddressInfo?>(null)
+    private val errorHandler = CoroutineExceptionHandler { context, exception ->
+        Logger.e(exception, TAG) { exception.stackTraceToString() }
+    }
+    private val walletScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + errorHandler)
+
+    private val _currentAddressState = MutableStateFlow<Response<WalletAddressInfo>>(
+        WalletAddressNotSelectedException().asGeneralError()
+    )
 
     override suspend fun init(): Response<Unit> {
         initFirstAddress()
@@ -60,16 +70,22 @@ class BitcoinSignetWallet(
             ?: return Response.Error.General(
                 WalletAddressBalanceNotFoundException()
             )
-        currentAddress.store(profile)
+        _currentAddressState.update { profile.asResponse() }
         return Unit.asResponse()
     }
 
     override suspend fun getCurrentWalletAddress(): Response<String> {
-        return currentAddress.load()?.address
-            ?.asResponse()
-            ?: Response.Error.General(
-                WalletAddressBalanceNotFoundException()
-            )
+        return when (val state = _currentAddressState.value) {
+            is Response.Success -> state.value.address.asResponse()
+            is Response.Error -> state
+        }
+    }
+
+    override fun getWalletAddressFlow(): Flow<Response<String>> =
+        _currentAddressState.map { address -> address.mapValueIfSuccess { it.address } }
+
+    override suspend fun getAvailableWalletAddresses(): Response<List<String>> {
+        return walletProfile.availableAddress.map { it.address }.asResponse()
     }
 
     override suspend fun getWalletBalance(): Response<WalletBalanceInfo> {
@@ -93,16 +109,18 @@ class BitcoinSignetWallet(
 
     override suspend fun getTransactionHistory(): Response<List<TransactionHistoryInfo>> {
         val allAddress = walletProfile.availableAddress.map { it.address }
-        return currentAddress.load()?.address
-            ?.let {
-                transactionRepository.getAddressTransaction(GetTransactionsRequest(it))
+        return when (val state = _currentAddressState.value) {
+            is Response.Success -> {
+                transactionRepository.getAddressTransaction(GetTransactionsRequest(state.value.address))
                     .mapValueIfSuccess { transactionList ->
                         transactionList.mapNotNull { it.toHistory(allAddress) }
                     }
             }
-            ?: Response.Error.General(
-                WalletAddressBalanceNotFoundException()
+
+            is Response.Error -> Response.Error.General(
+                WalletAddressBalanceNotFoundException(state.exception, state.message)
             )
+        }
     }
 
     override suspend fun sendCoins(
@@ -110,19 +128,21 @@ class BitcoinSignetWallet(
         amount: Long,
         neededFeeAmount: Long?
     ): Response<TransactionSendResult> {
-        return currentAddress.load()
-            ?.let { address ->
+        return when (val state = _currentAddressState.value) {
+            is Response.Success -> {
                 sendCoins(
-                    address.address,
-                    address.primaryKey,
+                    state.value.address,
+                    state.value.primaryKey,
                     destinationAddress,
                     amount,
                     neededFeeAmount
                 )
             }
-            ?: Response.Error.General(
-                WalletAddressBalanceNotFoundException()
+
+            is Response.Error -> Response.Error.General(
+                WalletAddressBalanceNotFoundException(state.exception, state.message)
             )
+        }
     }
 
     private suspend fun sendCoins(
@@ -146,5 +166,9 @@ class BitcoinSignetWallet(
     override suspend fun release(): Response<Unit> {
         walletScope.coroutineContext.cancelChildren()
         return Unit.asResponse()
+    }
+
+    companion object {
+        private const val TAG = "BitcoinSignetWallet"
     }
 }

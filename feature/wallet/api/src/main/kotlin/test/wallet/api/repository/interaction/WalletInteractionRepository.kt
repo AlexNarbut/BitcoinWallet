@@ -16,6 +16,9 @@ interface WalletInteractionRepository {
 
     suspend fun setCurrentWalletAddress(address: String): Response<Unit>
     suspend fun getCurrentWalletAddress(): Response<String>
+    suspend fun getCurrentWalletAddressFlow(): Flow<Response<String>>
+
+    suspend fun getAvailableWalletAddresses(): Response<List<String>>
 
     suspend fun getWalletBalance(): Response<WalletBalanceInfo>
     suspend fun getAddressBalance(address: String): Response<WalletAddressBalanceInfo>

@@ -15,8 +15,15 @@ data class CryptoScreenState(
 @Immutable
 data class CurrentStateHeader(
     val currentAddress: String,
+    val addressList: AddressListState,
     val addressBalanceIntBtc: String,
     val fullWalletBalanceIntBtc: String,
+)
+
+@Immutable
+data class AddressListState(
+    val addressList: List<String>,
+    val currentAddressIndex: Int
 )
 
 @Immutable

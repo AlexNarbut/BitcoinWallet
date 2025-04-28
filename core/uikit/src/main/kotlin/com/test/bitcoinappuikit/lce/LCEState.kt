@@ -76,6 +76,11 @@ fun <T> LCEState<T>.isLoading(): Boolean {
 
 fun <T> T.asLCEState() = LCEState.Content(this)
 
+fun <T> Response<T>.asLCEState(errorMapper: (Throwable) -> String) : LCEState<T> = when(this){
+    is Response.Success -> LCEState.Content(this.value)
+    is Response.Error -> LCEState.Error(errorMapper.invoke(this.exception))
+}
+
 val <T> LCEState<T>.content: T?
     get() = if (this is LCEState.Content) content else null
 
