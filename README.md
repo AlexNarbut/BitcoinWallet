@@ -2,7 +2,7 @@
 
 A Wallet application for Android for the Bitcoin (Signet) network.
 
-Stack: Kotlin, Coroutines,Hilt, Bitcoinj, Mempool API
+Stack: Kotlin, Coroutines,Hilt, Bitcoinj, Mempool API. 
 UI stack: Compose, MVVM, Compose Navigation
 
 ## Features:
