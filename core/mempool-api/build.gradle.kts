@@ -33,6 +33,10 @@ android {
     }
 }
 
+kapt {
+    correctErrorTypes = true
+}
+
 dependencies {
     implementation(libs.retrofit)
     implementation(libs.kotlinx.coroutines.core)
