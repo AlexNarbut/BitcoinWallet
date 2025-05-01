@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -70,17 +71,12 @@ class SendCoinsViewModel @Inject constructor(
             sendingState = sendState
         )
     }.flowOn(appDispatcher.default)
+        .onStart { updateWalletProfile() }
         .stateIn(viewModelScope, started = SharingStarted.Lazily, SendCoinsScreenState())
 
     private var updateWalletProfileJob: Job? = null
     private var editorJob: Job? = null
     private var sendJob: Job? = null
-
-    init {
-        viewModelScope.launch {
-            updateWalletProfile()
-        }
-    }
 
     fun updateWalletProfile(reload: Boolean = true) {
         updateWalletProfileJob?.cancel()
